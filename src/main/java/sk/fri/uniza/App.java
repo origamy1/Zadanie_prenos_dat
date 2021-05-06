@@ -5,8 +5,11 @@ import retrofit2.Response;
 import sk.fri.uniza.model.Location;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+
+import sk.fri.uniza.model.Token;
 import sk.fri.uniza.model.WeatherData;
 
 
@@ -89,6 +92,8 @@ public class App {
 
 
         iotNode.getAverageTemperature("station_1","6/05/2021 14:00", "6/05/2021 16:00");
+
+        System.out.println("\ntoken je:"+iotNode.getToken().toString());
 
     }
 }

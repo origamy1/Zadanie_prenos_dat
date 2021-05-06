@@ -5,9 +5,11 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 import sk.fri.uniza.api.WeatherStationService;
+import sk.fri.uniza.model.Token;
 import sk.fri.uniza.model.WeatherData;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.List;
 
 
@@ -35,12 +37,13 @@ public class IotNode {
 
     public double getAverageTemperature(String station,String from, String to){
         final Call<List<WeatherData>> historyWeather = weatherStationService.getHistoryWeather(station, from, to, List.of("airTemperature"));
+        double pom = 0;
         try {
             final Response<List<WeatherData>> response = historyWeather.execute();
             final List<WeatherData> body = response.body();
 
             int count = 0;
-            double pom = 0;
+
             for (WeatherData var : body)
             {
                 pom = pom + var.getAirTemperature();
@@ -52,6 +55,35 @@ public class IotNode {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return 1;
+        return pom;
+    }
+
+
+    public Token getToken(){
+
+           Token body = null;
+        final Call<Token> token = getWeatherStationService().getToken(
+                "Basic " + Base64.getEncoder()
+                        .encodeToString("admin:heslo".getBytes()), List.of("all"));
+
+        try {
+            final Response<Token> response_Token = token.execute();
+
+            if(response_Token.isSuccessful()){
+                body = response_Token.body();
+                System.out.println("\ntoto je token:"+body.toString());
+            }else{
+
+                System.out.println("Chyba pri ziskavani tokenu:"+response_Token.errorBody().string());
+            }
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+
+        }
+
+        return body;
+
     }
 }

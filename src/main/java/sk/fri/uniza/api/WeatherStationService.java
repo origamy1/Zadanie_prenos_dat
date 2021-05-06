@@ -57,7 +57,14 @@ public interface WeatherStationService {
 
     // ... getToken(authorization, claims);
 
+    @FormUrlEncoded
+    @POST("/apikey/createjwt")
+    Call<Token> getToken(
+            @Header("Authorization") String authorization,
+            @Field("claims") List<String> claims);
 
+
+    //getStationLocationsAuth(authorization);
     // ... getStationLocationsAuth(authorization);
 
 
