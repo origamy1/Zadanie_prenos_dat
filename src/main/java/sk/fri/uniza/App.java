@@ -93,7 +93,8 @@ public class App {
 
         iotNode.getAverageTemperature("station_1","6/05/2021 14:00", "6/05/2021 16:00");
 
-        System.out.println("\ntoken je:"+iotNode.getToken().toString());
+        System.out.println("\ntoken je:"+iotNode.getToken().getToken());
 
+        iotNode.getLocationsOfStation();
     }
 }

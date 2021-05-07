@@ -64,19 +64,52 @@ public interface WeatherStationService {
             @Field("claims") List<String> claims);
 
 
-    //getStationLocationsAuth(authorization);
+
+    ///////////////////////////////////////////////////////////////////////////////////////// AUTH
+    ///////////////////////////////////////////////////////////////////////////////////////// AUTH
+    ///////////////////////////////////////////////////////////////////////////////////////// AUTH
+    ///////////////////////////////////////////////////////////////////////////////////////// AUTH
+
+
+
     // ... getStationLocationsAuth(authorization);
+    @GET("/weatherAuth/locations")
+    Call<List<Location>> getStationLocationsAuth(
+            @Header("Authorization") String authorization);
 
 
     // ... getCurrentWeatherAuth(authorization, station);
-
+    @GET("/weatherAuth/{station}/current")
+    Call<WeatherData> getCurrentWeatherAuth(
+            @Header("Authorization") String authorization,
+            @Path("station") String station);
 
     // ... getCurrentWeatherAuth(authorization, station, fields);
+    @GET("/weatherAuth/{station}/current")
+    Call<WeatherData> getCurrentWeatherAuth(
+            @Header("Authorization") String authorization,
+            @Path("station") String station,
+            @Query("fields") List<String> fields);
 
 
     // ... getHistoryWeatherAuth(authorization, station, from, to);
+    @GET("/weather/{station}/history")
+    Call<List<WeatherData>> getHistoryWeatherAuth(
+            @Header("Authorization") String authorization,
+            @Path("station") String station,
+            @Query("from") String from,
+            @Query("to")  String to);
 
 
     // ... getHistoryWeatherAuth(authorization, station, from, to, fields);
+    @GET("/weather/{station}/history")
+    Call<List<WeatherData>> getHistoryWeatherAuth(
+            @Header("Authorization") String authorization,
+            @Path("station") String station,
+            @Query("from") String from,
+            @Query("to")  String to,
+            @Query("fields") List<String> fields
+    );
+
 
 }

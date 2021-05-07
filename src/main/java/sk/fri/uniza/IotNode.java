@@ -5,6 +5,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 import sk.fri.uniza.api.WeatherStationService;
+import sk.fri.uniza.model.Location;
 import sk.fri.uniza.model.Token;
 import sk.fri.uniza.model.WeatherData;
 
@@ -16,6 +17,7 @@ import java.util.List;
 public class IotNode {
     private final Retrofit retrofit;
     private final WeatherStationService weatherStationService;
+    private Token aToken;
 
     public IotNode() {
 
@@ -71,7 +73,7 @@ public class IotNode {
 
             if(response_Token.isSuccessful()){
                 body = response_Token.body();
-                System.out.println("\ntoto je token:"+body.toString());
+                System.out.println("\ntoto je token:"+body.getToken());
             }else{
 
                 System.out.println("Chyba pri ziskavani tokenu:"+response_Token.errorBody().string());
@@ -82,8 +84,29 @@ public class IotNode {
             e.printStackTrace();
 
         }
-
+        aToken = body;
         return body;
 
     }
+
+     public List<Location> getLocationsOfStation(){
+         List<Location> body = null;
+         final Call<List<Location>> stationLocationsAuth = getWeatherStationService().getStationLocationsAuth(aToken.getToken());
+
+         try {
+             final Response<List<Location>> responseLoc = stationLocationsAuth.execute();
+
+             if(responseLoc.isSuccessful()){
+                body = responseLoc.body();
+                 System.out.println("\n Autorizovaný prístup:\n");
+                 System.out.println(body.toString());
+             }else{
+                 System.out.println(responseLoc.errorBody().string());
+
+             }
+         } catch (IOException e) {
+             e.printStackTrace();
+         }
+         return body;
+     }
 }
