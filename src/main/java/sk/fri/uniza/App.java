@@ -29,19 +29,19 @@ public class App {
 
 
 
-        try {
-            // Odoslanie požiadavky na server pomocou REST rozhrania
-            Response<Map<String, String>> response = currentWeather.execute();
-
-            if (response.isSuccessful()) { // Dotaz na server bol neúspešný
-                //Získanie údajov vo forme Mapy stringov
-                Map<String, String> body = response.body();
-                System.out.println(body);
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            // Odoslanie požiadavky na server pomocou REST rozhrania
+//            Response<Map<String, String>> response = currentWeather.execute();
+//
+//            if (response.isSuccessful()) { // Dotaz na server bol neúspešný
+//                //Získanie údajov vo forme Mapy stringov
+//                Map<String, String> body = response.body();
+//                System.out.println(body);
+//            }
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
         iotNode.meteoData_of_stations_noAuth();
         iotNode.curWeather_noAuth("station_3");

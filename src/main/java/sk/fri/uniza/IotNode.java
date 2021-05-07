@@ -38,13 +38,10 @@ public class IotNode {
     }
 
     public double getAverageTemperature(String station,String from, String to){
-        final Call<List<WeatherData>> historyWeather = weatherStationService.getHistoryWeather(station, from, to, List.of("airTemperature"));
-        double pom = 0;
-        try {
-            final Response<List<WeatherData>> response = historyWeather.execute();
-            final List<WeatherData> body = response.body();
 
+            final List<WeatherData> body = historyNoAuth(station,from,to,List.of("airTemperature"));
             int count = 0;
+            double pom = 0;
 
             for (WeatherData var : body)
             {
@@ -54,36 +51,20 @@ public class IotNode {
             }
             pom = pom/count;
             System.out.println("Average temperature between-"+from+ " and-"+to+"is:"+pom);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
         return pom;
     }
 
 
     public Token getToken(){
 
-           Token body = null;
+        Token body = null;
         final Call<Token> token = getWeatherStationService().getToken(
                 "Basic " + Base64.getEncoder()
                         .encodeToString("admin:heslo".getBytes()), List.of("all"));
 
-        try {
-            final Response<Token> response_Token = token.execute();
-
-            if(response_Token.isSuccessful()){
-                body = response_Token.body();
-                System.out.println("\ntoto je token:"+body.getToken());
-            }else{
-
-                System.out.println("Chyba pri ziskavani tokenu:"+response_Token.errorBody().string());
-            }
-
-        } catch (IOException e) {
-
-            e.printStackTrace();
-
-        }
+        Object o = send_Request_to_Server(token);
+        body = (Token) o;
         aToken = body;
         return body;
 
@@ -91,60 +72,29 @@ public class IotNode {
 
      public List<Location> getLocationsOfStation(){
          List<Location> body = null;
-         final Call<List<Location>> stationLocationsAuth = getWeatherStationService().getStationLocationsAuth(aToken.getToken());
+         Call<List<Location>> stationLocationsAuth = getWeatherStationService().getStationLocationsAuth(aToken.getToken());
 
-         try {
-             final Response<List<Location>> responseLoc = stationLocationsAuth.execute();
+         Object o = send_Request_to_server_Auth(stationLocationsAuth);
+         body = (List<Location>) o;
 
-             if(responseLoc.isSuccessful()){
-                body = responseLoc.body();
-                 System.out.println("\n Miesta staníc ->Autorizovaný prístup:\n");
-                 System.out.println(body.toString());
-             }else{
-                 System.out.println(responseLoc.errorBody().string());
-
-             }
-         } catch (IOException e) {
-             e.printStackTrace();
-         }
          return body;
      }
 
      public WeatherData getAuthWeatherAtStation(String station){
          WeatherData body = null;
 
-         final Call<WeatherData> currentWeatherAuth = getWeatherStationService().getCurrentWeatherAuth(aToken.getToken(), station);
-         try {
-             final Response<WeatherData> responseWeath= currentWeatherAuth.execute();
-             if(responseWeath.isSuccessful()){
-                 body = responseWeath.body();
-                 System.out.println("\n Aktuálne počasie na stanici-> Autorizovaný prístup:\n");
-                 System.out.println(body.toString());
-             }else{
-                 System.out.println(responseWeath.errorBody().string());
-             }
-         } catch (IOException e) {
-             e.printStackTrace();
-         }
+         Call<WeatherData> currentWeatherAuth = getWeatherStationService().getCurrentWeatherAuth(aToken.getToken(), station);
+         Object o = send_Request_to_server_Auth(currentWeatherAuth);
+         body = (WeatherData) o;
          return body;
      }
 
      public WeatherData getAuthWeatherAtStation(String station, List<String> fields){
          WeatherData body = null;
 
-         final Call<WeatherData> currentWeatherAuth = getWeatherStationService().getCurrentWeatherAuth(aToken.getToken(), station,fields);
-         try {
-             final Response<WeatherData> responseWeath= currentWeatherAuth.execute();
-             if(responseWeath.isSuccessful()){
-                 body = responseWeath.body();
-                 System.out.println("\n Aktuálne počasie na stanici, vybrane udaje-> Autorizovaný prístup:\n");
-                 System.out.println(body.toString());
-             }else{
-                 System.out.println(responseWeath.errorBody().string());
-             }
-         } catch (IOException e) {
-             e.printStackTrace();
-         }
+         Call<WeatherData> currentWeatherAuth = getWeatherStationService().getCurrentWeatherAuth(aToken.getToken(), station,fields);
+         Object o = send_Request_to_server_Auth(currentWeatherAuth);
+         body = (WeatherData) o;
          return body;
      }
 
@@ -152,19 +102,9 @@ public class IotNode {
     public List<WeatherData> getAuthHistory_Weather(String station, String from, String to){
         List<WeatherData> body = null;
 
-        final Call<List<WeatherData>> historyWeatherAuth = getWeatherStationService().getHistoryWeatherAuth(aToken.getToken(), station, from, to);
-        try {
-            final Response<List<WeatherData>> responseHist = historyWeatherAuth.execute();
-            if(responseHist.isSuccessful()){
-                body = responseHist.body();
-                System.out.println("\n História počasia na stanici od do -> Autorizovaný prístup:\n");
-                System.out.println(body.toString());
-            }else{
-                System.out.println(responseHist.errorBody().string());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Call<List<WeatherData>> historyWeatherAuth = getWeatherStationService().getHistoryWeatherAuth(aToken.getToken(), station, from, to);
+        Object o = send_Request_to_server_Auth(historyWeatherAuth);
+        body = (List<WeatherData>) o;
         return body;
     }
 
@@ -172,41 +112,22 @@ public class IotNode {
     public List<WeatherData> getAuthHistory_Weather(String station, String from, String to, List<String> fields){
         List<WeatherData> body = null;
 
-        final Call<List<WeatherData>> historyWeatherAuth = getWeatherStationService().getHistoryWeatherAuth(aToken.getToken(), station, from, to,fields);
-        try {
-            final Response<List<WeatherData>> responseHist = historyWeatherAuth.execute();
-            if(responseHist.isSuccessful()){
-                body = responseHist.body();
-                System.out.println("\n História počasia od do, vybrané údaje -> Autorizovaný prístup:\n");
-                System.out.println(body.toString());
-            }else{
-                System.out.println(responseHist.errorBody().string());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Call<List<WeatherData>> historyWeatherAuth = getWeatherStationService().getHistoryWeatherAuth(aToken.getToken(), station, from, to,fields);
+        Object o = send_Request_to_server_Auth(historyWeatherAuth);
+        body = (List<WeatherData>) o;
+
         return body;
     }
-
 
 
     public List<WeatherData> historyNoAuth(String station, String from, String to){
 
         List<WeatherData> body = null;
 
-        final Call<List<WeatherData>> hist_1 = getWeatherStationService().getHistoryWeather(station,from,to);
+        Call<List<WeatherData>> hist_1 = getWeatherStationService().getHistoryWeather(station,from,to);
+        Object oBody = send_Request_to_server_NoAuth(hist_1);
+        body = (List<WeatherData>)oBody;
 
-        try {
-            final Response<List<WeatherData>> response_hist = hist_1.execute();
-            if(response_hist.isSuccessful()){
-                body = response_hist.body();
-                System.out.println(body);
-            }else{
-                System.out.println("Chyba pri načítanie historických dát:"+response_hist.errorBody().string());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         return body;
 
@@ -216,19 +137,9 @@ public class IotNode {
 
         List<WeatherData> body = null;
 
-        final Call<List<WeatherData>> hist_1 = getWeatherStationService().getHistoryWeather(station,from,to,fields);
-
-        try {
-            final Response<List<WeatherData>> response_hist = hist_1.execute();
-            if(response_hist.isSuccessful()){
-                body = response_hist.body();
-                System.out.println(body);
-            }else{
-                System.out.println("Chyba pri načítanie historických dát:"+response_hist.errorBody().string());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Call<List<WeatherData>> hist_1 = getWeatherStationService().getHistoryWeather(station,from,to,fields);
+        Object oBody = send_Request_to_server_NoAuth(hist_1);
+        body = (List<WeatherData>)oBody;
 
         return body;
 
@@ -237,18 +148,10 @@ public class IotNode {
     public WeatherData curWeather_noAuth(String station){
 
         WeatherData body = null;
-        final Call<WeatherData> weather_asClass =  getWeatherStationService().getCurrentWeather( station);
+        Call<WeatherData> weather_asClass =  getWeatherStationService().getCurrentWeather( station);
+        Object oBody = send_Request_to_server_NoAuth(weather_asClass);
+        body = (WeatherData)oBody;
 
-
-        try {
-            Response<WeatherData> responseAsClass = weather_asClass.execute();
-            if(responseAsClass.isSuccessful()){
-                body = responseAsClass.body();
-                System.out.println(body);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         return body;
     }
 
@@ -257,39 +160,47 @@ public class IotNode {
 
         List<Location> body = null;
         Call<List<Location>> stationLocations = getWeatherStationService().getStationLocations();
-
-        try {
-            Response<List<Location>> response = stationLocations.execute();
-
-            if (response.isSuccessful()) { // Dotaz na server bol neúspešný
-                //Získanie údajov vo forme Zoznam lokacií
-                body = response.body();
-                System.out.println(body);
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Object oBody = send_Request_to_server_NoAuth(stationLocations);
+        body = (List<Location>)oBody;
 
         return body;
     }
 
-//    public Object universal(Object o1){
-//
-//        try {
-//            final Response<WeatherData> responseWeath= o1.execute();
-//            if(responseWeath.isSuccessful()){
-//                body = responseWeath.body();
-//                System.out.println("\n Autorizovaný prístup:\n");
-//                System.out.println(body.toString());
-//            }else{
-//                System.out.println(responseWeath.errorBody().string());
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//    }
+
+    public Object send_Request_to_server_Auth(Call obj){
+        System.out.println("\n Prístup s autorizáciou!:\n");
+        return send_Request_to_Server(obj);
+    }
+
+
+    public Object send_Request_to_server_NoAuth(Call obj){
+        System.out.println("\n Bez autorizácie prístup!!:\n");
+        return send_Request_to_Server(obj);
+    }
+
+    public Object send_Request_to_Server(Call obj){
+        Response response = null;
+        Object body = null;
+        try {
+            response= obj.execute();
+            if(response.isSuccessful()){
+                body = response.body();
+
+                if(body.getClass() != Token.class) { // ak je to iná klása ako Token tak sa vypíše jeho obsah cez toString()
+                    System.out.println(body.toString());
+                }else{ // ak je to klása Token vypíše sa cez metódu getToken()  využítá reflexia
+                    System.out.println("\n\nZískaný Token:");
+                    System.out.println(((Token) body).getToken());
+                }
+
+            }else{
+                System.out.println(response.errorBody().string());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return body;
+    }
 
 }
 
