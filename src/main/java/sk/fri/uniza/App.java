@@ -17,7 +17,7 @@ import sk.fri.uniza.model.WeatherData;
  * Hello IoT!
  */
 public class App {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         IotNode iotNode = new IotNode();
         // Vytvorenie požiadavky na získanie údajov o aktuálnom počasí z
         // meteo stanice s ID: station_1
@@ -29,19 +29,19 @@ public class App {
 
 
 
-//        try {
-//            // Odoslanie požiadavky na server pomocou REST rozhrania
-//            Response<Map<String, String>> response = currentWeather.execute();
-//
-//            if (response.isSuccessful()) { // Dotaz na server bol neúspešný
-//                //Získanie údajov vo forme Mapy stringov
-//                Map<String, String> body = response.body();
-//                System.out.println(body);
-//            }
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            // Odoslanie požiadavky na server pomocou REST rozhrania
+            Response<Map<String, String>> response = currentWeather.execute();
+
+            if (response.isSuccessful()) { // Dotaz na server bol neúspešný
+                //Získanie údajov vo forme Mapy stringov
+                Map<String, String> body = response.body();
+                System.out.println(body);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         iotNode.meteoData_of_stations_noAuth();
         iotNode.curWeather_noAuth("station_3");
@@ -53,5 +53,12 @@ public class App {
         iotNode.getAuthWeatherAtStation("station_2",List.of("time","date"));
         iotNode.getAuthHistory_Weather("station_2","3/05/2021 15:00", "6/05/2021 15:00");
         iotNode.getAuthHistory_Weather("station_2","3/05/2021 15:00", "6/05/2021 15:00",List.of("time", "date"));
+
+        while(true) {
+            for (int i = 1; i<=3 ; i++) {
+                Thread.sleep(5000);
+                iotNode.sendField(i, 1);
+            }
+        }
     }
 }

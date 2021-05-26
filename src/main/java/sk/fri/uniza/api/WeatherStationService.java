@@ -3,6 +3,7 @@ package sk.fri.uniza.api;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import retrofit2.Call;
 import retrofit2.http.*;
+import sk.fri.uniza.model.Data;
 import sk.fri.uniza.model.Location;
 import sk.fri.uniza.model.Token;
 import sk.fri.uniza.model.WeatherData;
@@ -109,5 +110,12 @@ public interface WeatherStationService {
             @Query("fields") List<String> fields
     );
 
+    // ... getCurrentWeatherAsMap(station);
+    @POST("/household/{householdID}/{fieldID}")
+    Call<Data> sendHouseHoldData(
+            @Path("householdID") long householdID,
+            @Path("fieldID") String fieldID,
+            @Body Data data
+            );
 
 }

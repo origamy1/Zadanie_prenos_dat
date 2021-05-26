@@ -5,6 +5,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 import sk.fri.uniza.api.WeatherStationService;
+import sk.fri.uniza.model.Data;
 import sk.fri.uniza.model.Location;
 import sk.fri.uniza.model.Token;
 import sk.fri.uniza.model.WeatherData;
@@ -16,7 +17,9 @@ import java.util.List;
 
 public class IotNode {
     private final Retrofit retrofit;
+    private final Retrofit retrofitHouseHold;
     private final WeatherStationService weatherStationService;
+    private final WeatherStationService houseHoldService;
     private Token aToken;
 
     public IotNode() {
@@ -28,13 +31,24 @@ public class IotNode {
                 // Jackson knižnicu
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build();
+        retrofitHouseHold = new Retrofit.Builder()
+                // Url adresa kde je umietnená WeatherStation služba
+                .baseUrl("http://localhost:8080/")
+                // Na konvertovanie JSON objektu na java POJO použijeme
+                // Jackson knižnicu
+                .addConverterFactory(JacksonConverterFactory.create())
+                .build();
         // Vytvorenie inštancie komunikačného rozhrania
         weatherStationService = retrofit.create(WeatherStationService.class);
-
+        houseHoldService = retrofitHouseHold.create(WeatherStationService.class);
     }
 
     public WeatherStationService getWeatherStationService() {
         return weatherStationService;
+    }
+
+    public WeatherStationService getHouseHoldService(){
+        return houseHoldService;
     }
 
     public double getAverageTemperature(String station,String from, String to){
@@ -67,6 +81,68 @@ public class IotNode {
         body = (Token) o;
         aToken = body;
         return body;
+
+    }
+
+    public void  sendField(int fieldIDtoResent,long householdIDtoSend){
+        final WeatherData data_stat1 = getAuthWeatherAtStation("station_1");
+        String date = data_stat1.getDate();
+        final String time = data_stat1.getTime();
+
+        final Double  airTemperature = data_stat1.getAirTemperature();
+        final Integer batteryLife = data_stat1.getBatteryLife();
+        final Double windSpeed = data_stat1.getWindSpeed();
+
+
+        date = date.replace(".","/");
+        String dateToSend = date+" "+time;
+
+        Data data = new Data();
+        data.setDateTime(dateToSend);
+
+
+        System.out.println(data);
+
+        String whatData = null;
+        switch (fieldIDtoResent){
+            case 1 :
+                data.setValue(String.valueOf(airTemperature));
+                whatData = "airTemp";
+                data.setType("double");
+                break;
+            case 2 :
+                data.setValue(String.valueOf(batteryLife));
+                whatData = "bateryLife";
+                data.setType("integer");
+                break;
+            case 3 :
+                data.setValue(String.valueOf(windSpeed));
+                whatData = "windSpeed";
+                data.setType("double");
+                break;
+            default:
+                data.setValue(String.valueOf(airTemperature));
+                whatData = "airTemp";
+                data.setType("double");
+                break;
+
+        }
+        final Call<Data> mapCall = getHouseHoldService().sendHouseHoldData(householdIDtoSend, whatData, data);// dateToSend, String.valueOf(airTemperature), "double"
+
+
+        try {
+            final Response<Data> response = mapCall.execute();
+            if(response.isSuccessful()) {
+                System.out.println("\nIS HERE<<\n");
+                Data body = response.body();
+                System.out.println(body);
+            }else{
+                System.out.println("Požiadavka nebola úspešná");
+                System.out.println(response.errorBody().string());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
